@@ -93,89 +93,138 @@ const NotificationList: React.FC<{ user: any }> = ({ user }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2 }}>
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h5" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Bell size={24} /> Notifications
+    <Box sx={{ maxWidth: 700, mx: 'auto', px: 2 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 4, 
+          borderRadius: 6, 
+          bgcolor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)'
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h5" fontWeight="800" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, letterSpacing: -0.5 }}>
+            <Box sx={{ p: 1, borderRadius: 2, bgcolor: 'primary.main', color: 'white', display: 'flex' }}>
+              <Bell size={20} />
+            </Box>
+            Latest Updates
           </Typography>
           
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Filter Type</InputLabel>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel>Filter</InputLabel>
             <Select
               value={typeFilter}
-              label="Filter Type"
+              label="Filter"
+              variant="outlined"
+              sx={{ borderRadius: 3 }}
               onChange={(e) => {
                 setTypeFilter(e.target.value);
                 setPage(1);
               }}
             >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="Placement">Placement</MenuItem>
-              <MenuItem value="Event">Event</MenuItem>
-              <MenuItem value="Result">Result</MenuItem>
+              <MenuItem value="">All Notifications</MenuItem>
+              <MenuItem value="Placement">Placements</MenuItem>
+              <MenuItem value="Event">Events</MenuItem>
+              <MenuItem value="Result">Results</MenuItem>
             </Select>
           </FormControl>
         </Box>
 
-        <Divider sx={{ mb: 2 }} />
-
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress thickness={5} size={40} sx={{ borderRadius: 10 }} />
           </Box>
         ) : notifications.length === 0 ? (
-          <Typography textAlign="center" color="text.secondary" sx={{ py: 4 }}>
-            No notifications found
-          </Typography>
+          <Box sx={{ py: 8, textAlign: 'center' }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              All caught up!
+            </Typography>
+            <Typography variant="body2" color="text.disabled">
+              No notifications found for this filter.
+            </Typography>
+          </Box>
         ) : (
-          <List>
+          <List sx={{ p: 0 }}>
             {notifications.map((n) => (
               <ListItem
                 key={n._id}
                 sx={{
-                  mb: 1,
-                  borderRadius: 2,
-                  bgcolor: n.isRead ? 'transparent' : 'rgba(25, 118, 210, 0.05)',
-                  '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.02)' },
-                  transition: 'background 0.3s'
+                  mb: 2,
+                  p: 2,
+                  borderRadius: 4,
+                  bgcolor: n.isRead ? 'rgba(0,0,0,0.02)' : 'white',
+                  border: n.isRead ? '1px solid transparent' : '1px solid #e3eefc',
+                  boxShadow: n.isRead ? 'none' : '0 4px 12px 0 rgba(0,0,0,0.03)',
+                  transition: 'all 0.2s',
+                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 15px 0 rgba(0,0,0,0.05)' }
                 }}
                 secondaryAction={
                   !n.isRead && (
-                    <IconButton edge="end" onClick={() => handleMarkAsRead(n._id)} title="Mark as read">
-                      <CheckCheck size={20} color="#1976d2" />
+                    <IconButton 
+                      edge="end" 
+                      onClick={() => handleMarkAsRead(n._id)} 
+                      sx={{ bgcolor: '#e3eefc', color: 'primary.main', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
+                    >
+                      <CheckCheck size={18} />
                     </IconButton>
                   )
                 }
               >
-                <Box sx={{ mr: 2 }}>
-                  <Badge color="primary" variant="dot" invisible={n.isRead}>
+                <Box sx={{ 
+                  mr: 2.5, 
+                  p: 1.5, 
+                  borderRadius: 3, 
+                  bgcolor: n.isRead ? '#f5f5f5' : '#eff6ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Badge color="error" variant="dot" invisible={n.isRead} overlap="circular">
                     {typeIcons[n.type]}
                   </Badge>
                 </Box>
                 <ListItemText
                   primary={
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <Typography variant="body1" fontWeight={n.isRead ? 400 : 600}>
+                    <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 0.5 }}>
+                      <Typography variant="subtitle1" fontWeight={n.isRead ? 500 : 700} sx={{ color: 'text.primary' }}>
                         {n.message}
                       </Typography>
-                      <Chip label={n.type} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+                      <Chip 
+                        label={n.type} 
+                        size="small" 
+                        sx={{ 
+                          height: 20, 
+                          fontSize: '0.65rem', 
+                          fontWeight: 700,
+                          bgcolor: n.type === 'Placement' ? '#e3f2fd' : n.type === 'Event' ? '#e8f5e9' : '#fff3e0',
+                          color: n.type === 'Placement' ? '#1976d2' : n.type === 'Event' ? '#2e7d32' : '#ed6c02',
+                          border: 'none'
+                        }} 
+                      />
                     </Box>
                   }
-                  secondary={new Date(n.createdAt).toLocaleString()}
+                  secondary={
+                    <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 500 }}>
+                      {new Date(n.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                    </Typography>
+                  }
                 />
               </ListItem>
             ))}
           </List>
         )}
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination 
             count={totalPages} 
             page={page} 
             onChange={(_, v) => setPage(v)} 
             color="primary" 
-            size="small"
+            shape="rounded"
+            size="medium"
           />
         </Box>
       </Paper>

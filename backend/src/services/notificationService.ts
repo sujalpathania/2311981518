@@ -3,14 +3,10 @@ import Notification, { NotificationType } from '../models/Notification';
 import User from '../models/User';
 import { log } from '../utils/logger';
 
-// Redis connection configuration
-const connection = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-};
+import redisConnection from '../config/redisConfig';
 
 // 1. Initialize the Notification Queue
-export const notificationQueue = new Queue('notification-delivery', { connection });
+export const notificationQueue = new Queue('notification-delivery', { connection: redisConnection });
 
 /**
  * Service to process notification creation

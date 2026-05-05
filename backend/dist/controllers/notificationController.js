@@ -7,11 +7,7 @@ exports.markAsRead = exports.triggerNotification = exports.getNotifications = vo
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const Notification_1 = __importDefault(require("../models/Notification"));
 const notificationService_1 = require("../services/notificationService");
-const ioredis_1 = __importDefault(require("ioredis"));
-const redis = new ioredis_1.default({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-});
+const redisConfig_1 = __importDefault(require("../config/redisConfig"));
 /**
  * @desc    Get all notifications with pagination and filtering
  * @route   GET /api/notifications
@@ -25,7 +21,7 @@ exports.getNotifications = (0, express_async_handler_1.default)(async (req, res)
     const skip = (page - 1) * limit;
     // CACHE STRATEGY
     const cacheKey = `notifications:${userId}:${page}:${limit}:${type || 'all'}`;
-    const cachedData = await redis.get(cacheKey);
+    const cachedData = await redisConfig_1.default.get(cacheKey);
     if (cachedData) {
         // log('backend', 'debug', 'controller', `Cache hit for ${cacheKey}`);
         res.json(JSON.parse(cachedData));
@@ -50,7 +46,7 @@ exports.getNotifications = (0, express_async_handler_1.default)(async (req, res)
         }
     };
     // Cache the result for 60 seconds to reduce DB load
-    await redis.setex(cacheKey, 60, JSON.stringify(response));
+    await redisConfig_1.default.setex(cacheKey, 60, JSON.stringify(response));
     res.json(response);
 });
 /**
@@ -81,8 +77,8 @@ exports.markAsRead = (0, express_async_handler_1.default)(async (req, res) => {
     notification.isRead = true;
     await notification.save();
     // Invalidate cache for this user
-    const keys = await redis.keys(`notifications:${notification.userId}:*`);
+    const keys = await redisConfig_1.default.keys(`notifications:${notification.userId}:*`);
     if (keys.length > 0)
-        await redis.del(...keys);
+        await redisConfig_1.default.del(...keys);
     res.json({ message: 'Marked as read' });
 });

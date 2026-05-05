@@ -49,8 +49,7 @@ export const log = async (
       message,
       timestamp: new Date().toISOString()
     }).catch(err => {
-      // Don't recursive log errors here, just a silent fail or simple console.error
-      console.error('Failed to log to external service:', err.message);
+      // Silent fail to avoid terminal clutter when external service is down
     });
   }
 };

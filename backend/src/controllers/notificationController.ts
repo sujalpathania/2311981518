@@ -3,12 +3,7 @@ import asyncHandler from 'express-async-handler';
 import Notification from '../models/Notification';
 import { createNotification } from '../services/notificationService';
 import { log } from '../utils/logger';
-import Redis from 'ioredis';
-
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-});
+import redis from '../config/redisConfig';
 
 /**
  * @desc    Get all notifications with pagination and filtering
@@ -25,12 +20,14 @@ export const getNotifications = asyncHandler(async (req: any, res: Response) => 
 
   // CACHE STRATEGY
   const cacheKey = `notifications:${userId}:${page}:${limit}:${type || 'all'}`;
-  const cachedData = await redis.get(cacheKey);
-
-  if (cachedData) {
-    // log('backend', 'debug', 'controller', `Cache hit for ${cacheKey}`);
-    res.json(JSON.parse(cachedData));
-    return;
+  try {
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      res.json(JSON.parse(cachedData));
+      return;
+    }
+  } catch (err) {
+    // Silent fail for cache - proceed to DB
   }
 
   // QUERY OPTIMIZATION: Using the composite index (userId, isRead, createdAt)
@@ -55,7 +52,11 @@ export const getNotifications = asyncHandler(async (req: any, res: Response) => 
   };
 
   // Cache the result for 60 seconds to reduce DB load
-  await redis.setex(cacheKey, 60, JSON.stringify(response));
+  try {
+    await redis.setex(cacheKey, 60, JSON.stringify(response));
+  } catch (err) {
+    // Ignore cache write failures
+  }
 
   res.json(response);
 });

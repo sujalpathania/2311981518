@@ -1,12 +1,8 @@
 import { Worker, Job } from 'bullmq';
 import Notification from '../models/Notification';
 import { log } from '../utils/logger';
-import { io } from '../index'; // Note: In multi-process, use Redis Pub/Sub
-
-const connection = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-};
+import { io } from '../index'; 
+import redisConnection from '../config/redisConfig';
 
 // 2. Define the Worker
 export const notificationWorker = new Worker('notification-delivery', async (job: Job) => {
@@ -36,8 +32,8 @@ export const notificationWorker = new Worker('notification-delivery', async (job
     throw error; // Let BullMQ handle the retry mechanism
   }
 }, { 
-  connection,
-  concurrency: 50 // High scalability: process 50 jobs in parallel per worker instance
+  connection: redisConnection,
+  concurrency: 50 
 });
 
 notificationWorker.on('failed', (job, err) => {

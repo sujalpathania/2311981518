@@ -27,12 +27,13 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
   const user = await User.create({ name, email, password }); // Note: real app should bcrypt
 
   if (user) {
-    log('backend', 'info', 'controller', `User registered: ${email}`);
+    const token = generateToken(String(user._id));
+    log('backend', 'info', 'controller', `User registered: ${email} - Token Start: ${token.substring(0, 10)}...`);
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id.toString()),
+      token,
     });
   } else {
     res.status(400);
@@ -50,12 +51,13 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await User.findOne({ email });
 
   if (user && user.password === password) { // Note: real app should bcrypt.compare
-    log('backend', 'info', 'controller', `User logged in: ${email}`);
+    const token = generateToken(String(user._id));
+    log('backend', 'info', 'controller', `User logged in: ${email} - Token Start: ${token.substring(0, 10)}...`);
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id.toString()),
+      token,
     });
   } else {
     log('backend', 'warn', 'controller', `Failed login attempt for: ${email}`);

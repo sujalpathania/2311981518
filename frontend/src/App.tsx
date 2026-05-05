@@ -58,13 +58,22 @@ function App() {
         </AppBar>
       </Box>
 
-      <Container maxWidth="lg">
-        {!user ? (
-          <Login onLogin={setUser} />
-        ) : (
-          <NotificationList user={user} />
-        )}
-      </Container>
+      <Box sx={{ 
+        minHeight: 'calc(100vh - 64px)', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #f4f6f8 0%, #e3e9f0 100%)',
+        py: 4
+      }}>
+        <Container maxWidth="lg">
+          {!user ? (
+            <Login onLogin={setUser} />
+          ) : (
+            <NotificationList user={user} />
+          )}
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 }

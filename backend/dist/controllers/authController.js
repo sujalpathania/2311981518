@@ -31,7 +31,7 @@ exports.registerUser = (0, express_async_handler_1.default)(async (req, res) => 
             _id: user._id,
             name: user.name,
             email: user.email,
-            token: generateToken(user._id),
+            token: generateToken(String(user._id)),
         });
     }
     else {
@@ -52,7 +52,7 @@ exports.loginUser = (0, express_async_handler_1.default)(async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            token: generateToken(user._id),
+            token: generateToken(String(user._id)),
         });
     }
     else {

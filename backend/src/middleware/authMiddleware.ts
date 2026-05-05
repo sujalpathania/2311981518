@@ -25,10 +25,10 @@ export const protect = asyncHandler(async (req: AuthRequest, res: Response, next
       }
 
       next();
-    } catch (error) {
-      log('backend', 'error', 'auth', `Token verification failed: ${error}`);
+    } catch (error: any) {
+      log('backend', 'error', 'auth', `Token verification failed: ${error.message} - Token: ${token?.substring(0, 10)}...`);
       res.status(401);
-      throw new Error('Not authorized, token failed');
+      throw new Error(`Not authorized, token failed: ${error.message}`);
     }
   }
 

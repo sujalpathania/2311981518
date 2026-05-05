@@ -7,13 +7,9 @@ exports.createNotification = exports.notificationQueue = void 0;
 const bullmq_1 = require("bullmq");
 const User_1 = __importDefault(require("../models/User"));
 const logger_1 = require("../utils/logger");
-// Redis connection configuration
-const connection = {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-};
+const redisConfig_1 = __importDefault(require("../config/redisConfig"));
 // 1. Initialize the Notification Queue
-exports.notificationQueue = new bullmq_1.Queue('notification-delivery', { connection });
+exports.notificationQueue = new bullmq_1.Queue('notification-delivery', { connection: redisConfig_1.default });
 /**
  * Service to process notification creation
  * In a real-world scenario, this might be triggered by an event

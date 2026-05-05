@@ -7,11 +7,8 @@ exports.notificationWorker = void 0;
 const bullmq_1 = require("bullmq");
 const Notification_1 = __importDefault(require("../models/Notification"));
 const logger_1 = require("../utils/logger");
-const index_1 = require("../index"); // Note: In multi-process, use Redis Pub/Sub
-const connection = {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-};
+const index_1 = require("../index");
+const redisConfig_1 = __importDefault(require("../config/redisConfig"));
 // 2. Define the Worker
 exports.notificationWorker = new bullmq_1.Worker('notification-delivery', async (job) => {
     const { userId, type, message } = job.data;
@@ -37,8 +34,8 @@ exports.notificationWorker = new bullmq_1.Worker('notification-delivery', async 
         throw error; // Let BullMQ handle the retry mechanism
     }
 }, {
-    connection,
-    concurrency: 50 // High scalability: process 50 jobs in parallel per worker instance
+    connection: redisConfig_1.default,
+    concurrency: 50
 });
 exports.notificationWorker.on('failed', (job, err) => {
     (0, logger_1.log)('backend', 'error', 'cron_job', `Job ${job?.id} failed after retries: ${err.message}`);
